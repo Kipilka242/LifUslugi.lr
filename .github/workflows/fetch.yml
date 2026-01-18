@@ -24,7 +24,8 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: python fetch.py
-
+permissions:
+  contents: write
       - name: Commit changes
         run: |
           git config user.name "github-actions"
