@@ -30,3 +30,4 @@ jobs:
           git add data.json
           git commit -m "Update data" || echo "No changes"
           git push
+Enable Telegram fetch workflow
