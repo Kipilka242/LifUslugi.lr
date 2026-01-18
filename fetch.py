@@ -2,6 +2,11 @@ import requests
 import json
 import os
 import time
+      - name: Run script
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: python fetch.py
+
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 URL = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
