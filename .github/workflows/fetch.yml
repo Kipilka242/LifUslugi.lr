@@ -5,17 +5,17 @@ on:
     - cron: "*/1 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
 
-permissions:
-  contents: write
-  
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: database  # 👈 checkout именно этой ветки
+          ref: database
 
       - uses: actions/setup-python@v5
         with:
@@ -27,10 +27,11 @@ permissions:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: python fetch.py
+
       - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add data.json
           git commit -m "Update data" || echo "No changes"
-          git push origin database  # 👈 пушим только в ветку database
+          git push origin database
