@@ -26,9 +26,13 @@ for update in resp.get("result", []):
     if not msg:
         continue
 
-    chat_title = msg["chat"].get("title")
-    if not chat_title:
-        continue  # пропускаем лички
+    chat = msg["chat"]
+
+    # 🔥 Фильтрация: сохраняем только каналы
+    if chat.get("type") != "channel":
+        continue
+
+    chat_title = chat.get("title", "Без названия")
 
     text = msg.get("text", "")
     date = msg.get("date", now)
