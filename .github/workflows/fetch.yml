@@ -11,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: database  # 👈 checkout именно этой ветки
 
       - uses: actions/setup-python@v5
         with:
@@ -23,4 +25,10 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: python fetch.py
 
-     
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add data.json
+          git commit -m "Update data" || echo "No changes"
+          git push origin database  # 👈 пушим только в ветку database
