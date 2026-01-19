@@ -26,16 +26,18 @@ for update in resp.get("result", []):
     if not msg:
         continue
 
-    chat = msg["chat"]
-
-    # 🔥 Фильтрация: сохраняем только каналы
-    if chat.get("type") != "channel":
+    # 🔥 Ловим только автоматические форварды из каналов
+    if not msg.get("is_automatic_forward"):
         continue
 
-    chat_title = chat.get("title", "Без названия")
+    fwd = msg.get("forward_from_chat", {})
+    if fwd.get("type") != "channel":
+        continue
+
+    chat_title = fwd.get("title", "Без названия")
 
     text = msg.get("text", "")
-    date = msg.get("date", now)
+    date = msg.get("forward_date", msg.get("date", now))
 
     if chat_title not in data["chats"]:
         data["chats"][chat_title] = []
