@@ -13,9 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ Чекаутим main, где лежит fetch.py
       - uses: actions/checkout@v4
         with:
-          ref: database
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
@@ -23,13 +24,22 @@ jobs:
 
       - run: pip install requests
 
-      - name: Run script
+      # ✅ Сброс offset, чтобы Telegram начал с нуля
+      - name: Reset Telegram offset
+        run: |
+          curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/getUpdates?offset=-1"
+
+      # ✅ Запускаем скрипт
+      - name: Run fetch.py
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: python fetch.py
 
-      - name: Commit changes
+      # ✅ Переключаемся на ветку database и пушим туда
+      - name: Commit data.json to database
         run: |
+          git fetch origin database
+          git checkout database
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add data.json
