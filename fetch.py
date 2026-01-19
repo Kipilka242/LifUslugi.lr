@@ -4,7 +4,7 @@ import os
 import time
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
-URL = f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-30"
+URL = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
 
 DATA_FILE = "data.json"
 MAX_AGE = 24 * 3600  # 24 часа
@@ -26,16 +26,30 @@ for update in resp.get("result", []):
     if not msg:
         continue
 
-    # 🔥 Ловим только автоматические форварды из каналов
+    # 🔥 1. Должен быть автофорвард
     if not msg.get("is_automatic_forward"):
         continue
 
-    fwd = msg.get("forward_from_chat", {})
-    if fwd.get("type") != "channel":
+    # 🔥 2. Определяем канал
+    channel = None
+
+    # sender_chat — самый надёжный источник
+    if "sender_chat" in msg and msg["sender_chat"].get("type") == "channel":
+        channel = msg["sender_chat"]
+
+    # forward_origin — тоже канал
+    elif "forward_origin" in msg and msg["forward_origin"].get("type") == "channel":
+        channel = msg["forward_origin"]["chat"]
+
+    # forward_from_chat — старый формат
+    elif "forward_from_chat" in msg and msg["forward_from_chat"].get("type") == "channel":
+        channel = msg["forward_from_chat"]
+
+    # Если канал не найден — пропускаем
+    if not channel:
         continue
 
-    chat_title = fwd.get("title", "Без названия")
-
+    chat_title = channel.get("title", "Без названия")
     text = msg.get("text", "")
     date = msg.get("forward_date", msg.get("date", now))
 
