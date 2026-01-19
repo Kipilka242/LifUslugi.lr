@@ -4,7 +4,7 @@ import os
 import time
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
-URL = f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-1"
+URL = f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-30"
 
 DATA_FILE = "data.json"
 MAX_AGE = 24 * 3600  # 24 часа
