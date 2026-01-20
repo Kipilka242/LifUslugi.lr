@@ -13,35 +13,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout MAIN — обязательно, иначе cron не работает
       - uses: actions/checkout@v4
         with:
-          ref: database
+          ref: main
 
+      # 2. Переключаемся на ветку database
+      - name: Switch to database branch
+        run: |
+          git fetch
+          git checkout database
+
+      # 3. Python
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - run: pip install requests
 
+      # 4. Сброс offset (как у тебя)
       - name: Reset Telegram offset
         run: |
           curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/getUpdates?offset=-1"
 
+      # 5. Запуск fetch.py
       - name: Run fetch.py
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: python fetch.py
 
+      # 6. Коммит с amend
       - name: Commit changes (amend last commit)
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+
           git add data.json offset.txt
 
-          # Если есть изменения — переписываем последний коммит
+          # Если нет изменений — выходим
           if git diff --cached --quiet; then
             echo "No changes"
-          else
-            git commit --amend --no-edit || git commit -m "Initial commit"
-            git push --force
+            exit 0
           fi
+
+          # Переписываем последний коммит
+          git commit --amend --no-edit || git commit -m "Initial commit"
+
+          # Пушим с force
+          git push --force
