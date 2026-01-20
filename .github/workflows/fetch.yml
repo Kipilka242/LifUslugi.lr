@@ -32,10 +32,16 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: python fetch.py
 
-      - name: Commit changes
+      - name: Commit changes (amend last commit)
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add data.json
-          git commit -m "Update data" || echo "No changes"
-          git push
+          git add data.json offset.txt
+
+          # Если есть изменения — переписываем последний коммит
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit --amend --no-edit || git commit -m "Initial commit"
+            git push --force
+          fi
